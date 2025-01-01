@@ -16,7 +16,7 @@ Let me know if you appreciate this project!
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/yourusername/hianime-spotlight-api.git
+   git clone https://github.com/anime-kun32/hianime-spotlight-api.git
    cd hianime-spotlight-api
    ```
 
@@ -72,23 +72,34 @@ Let me know if you appreciate this project!
 Here’s a sample response you can expect when making a request to the API:
 
 ```json
-[
-    {
+{
+  "success": true,
+  "data": {
+    "spotlightAnimes": [
+      {
         "rank": 1,
         "id": "ranma-1-2-19335",
         "name": "Ranma 1/2",
-        "description": "During their martial arts training expedition in China, Ranma Saotome and his father Genma suffered an accident...",
+        "description": "During their martial arts training expedition in China, Ranma Saotome and his father Genma suffered an accident, which in turn, afflicted them with a curse—whenever they are doused with cold water, Ranma transforms into a girl, while his father turns into a panda! Only hot water can reverse these changes, but any further contact with cold water opens the can of worms once more.\n\nUnfortunately, the trouble does not end there, as Ranma finds out about his betrothal to one of the daughters of Soun Tendou, his father's closest friend. During the families' first meeting, it is decided that Ranma is to be married to Akane, the youngest daughter, a decision that is met with vehement protests from both sides. The two are simply not compatible, yet they are forced to live under one roof. Ranma's status quo further adds to the chaos, leading him to a series of comedic situations and misunderstandings that, in the grand scheme of things, may just be what he needs to work with Akane.",
         "poster": "https://cdn.noitatnemucod.net/thumbnail/1366x768/100/af1c058948079aabe09de052cc7b4261.jpg",
         "jname": "Ranma ½ (2024)",
         "episodes": {
-            "sub": 12,
-            "dub": 12
+          "sub": 12,
+          "dub": 12
         },
         "type": "TV",
-        "otherInfo": ["TV", "23m", "Oct 6, 2024", "HD"],
-        "anilistId": 16498
-    }
-]
+        "otherInfo": [
+          "TV",
+          "23m",
+          "Oct 6, 2024",
+          "HD"
+        ],
+        "anilistId": 178533
+      }
+    ]
+  }
+}
+
 ```
 
 ### Disclaimer
