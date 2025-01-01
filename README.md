@@ -79,7 +79,7 @@ Let me know if you appreciate this project!
 4. **Deploy**: Once everything is set up, deploy the project. Vercel will automatically build and deploy the app.
 
 ### Sample Response
- endpoint : /api/spotlight
+  ### endpoint :  `api/spotlight`
 Here’s a sample response you can expect when making a request to the API:
 
 ```json
