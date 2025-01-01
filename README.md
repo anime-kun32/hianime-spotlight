@@ -40,25 +40,26 @@ Let me know if you appreciate this project!
    - **ALLOWED_ORIGINS**: This specifies which origins can access your API. List allowed origins in this format: `ALLOWED_ORIGINS=["https://your-frontend.com"]`. You can add multiple origins if needed.
 
    Example `.env` file:
-   ```env
+   ```.env
    # API Base URL 
-# Please replace with aniwatch your API URL .
-# For the AniWatch API, visit: https://github.com/ghoshRitesh12/aniwatch-api
-# example url : https://api-aniwatch.onrender.com
+   # Please replace with aniwatch your API URL .
+   # For the AniWatch API, visit: https://github.com/ghoshRitesh12/aniwatch-api
+   # example url : https://api-aniwatch.onrender.com
 
-API_BASE_URL=
+   API_BASE_URL=
 
-# API Origin Header
-# Set the origin header to the domain where your frontend is hosted to avoid CORS issues.
-# For example, if you're running the frontend on 'https://your-frontend.com', set:
-# API_ORIGIN_HEADER=https://your-frontend.com
-API_ORIGIN_HEADER=
+   # API Origin Header
+   # Set the origin header to the domain where your api is hosted to avoid CORS issues.
+   # For example, if you're running the api on 'https://your-api.com', set:
+   # API_ORIGIN_HEADER=https://your-api.com
+     API_ORIGIN_HEADER=
 
-# Allowed Origins
-# List of domains that are allowed to access your API.
-# Add any domains where your frontend app is hosted. For example:
-# ALLOWED_ORIGINS=["https://your-frontend.com", "https://example2.com"]
-ALLOWED_ORIGINS=["https://your-frontend.com"]
+   # Allowed Origins
+   # List of domains that are allowed to access your API.
+   # Add any domains where your api is hosted. For example:
+   # ALLOWED_ORIGINS=["https://your-api.com", "https://example2.com"]
+   ALLOWED_ORIGINS=["https://your-api.com"]
+
    ```
 
 5. **Run the app locally**:
@@ -78,7 +79,7 @@ ALLOWED_ORIGINS=["https://your-frontend.com"]
 4. **Deploy**: Once everything is set up, deploy the project. Vercel will automatically build and deploy the app.
 
 ### Sample Response
-
+ endpoint : /api/spotlight
 Here’s a sample response you can expect when making a request to the API:
 
 ```json
