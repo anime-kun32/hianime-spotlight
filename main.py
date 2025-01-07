@@ -30,6 +30,7 @@ templates = Jinja2Templates(directory="templates")
 # Fetch configurations from environment variables
 API_BASE_URL = os.getenv("API_BASE_URL")
 API_ORIGIN_HEADER = os.getenv("API_ORIGIN_HEADER")
+CONSUMET_API_BASE_URL = os.getenv("CONSUMET_API_BASE_URL")
 
 @app.get("/api/spotlight")
 async def get_spotlight(request: Request):
@@ -61,6 +62,19 @@ async def get_spotlight(request: Request):
                         anilist_id = details_data["data"]["anime"]["info"].get("anilistId")
                         if anilist_id:
                             anime["anilistId"] = anilist_id
+
+                            # Fetch trailer from Consumet API
+                            try:
+                                trailer_response = await client.get(
+                                    f"{CONSUMET_API_BASE_URL}/meta/anilist/info/{anilist_id}"
+                                )
+                                trailer_data = trailer_response.json()
+
+                                if trailer_data.get("success"):
+                                    anime["trailer"] = trailer_data["data"].get("trailerUrl")  # Adjust based on actual response structure
+                            except Exception as trailer_error:
+                                # Log the error or handle it as needed
+                                print(f"Error fetching trailer for Anilist ID {anilist_id}: {trailer_error}")
 
                 updated_spotlight.append(anime)
 
