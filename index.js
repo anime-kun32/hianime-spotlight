@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const { META } = require('@consumet/extensions');
+const fetch = require('node-fetch'); // Ensure you have 'node-fetch' installed
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -17,8 +17,34 @@ app.use(express.json());
 const API_BASE_URL = process.env.API_BASE_URL;
 const API_ORIGIN_HEADER = process.env.API_ORIGIN_HEADER;
 
-// Consumet API Instance
-const anilist = new META.Anilist();
+// Function to fetch trailer data from AniList API
+async function fetchAnilistTrailer(anilistId) {
+  const query = `
+    query ($id: Int) {
+      Media(id: $id, type: ANIME) {
+        trailer {
+          id
+          site
+          thumbnail
+          url
+        }
+      }
+    }
+  `;
+  const variables = { id: anilistId };
+  const response = await fetch('https://graphql.anilist.co', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ query, variables }),
+  });
+  const data = await response.json();
+  if (data.data && data.data.Media && data.data.Media.trailer) {
+    return data.data.Media.trailer;
+  }
+  return null;
+}
 
 app.get('/api/spotlight', async (req, res) => {
   try {
@@ -32,7 +58,7 @@ app.get('/api/spotlight', async (req, res) => {
       return res.status(500).json({ error: 'Failed to fetch spotlight data' });
     }
 
-    // Update each anime with additional details and trailer info from Consumet API
+    // Update each anime with additional details and trailer info from AniList API
     const updatedSpotlight = await Promise.all(
       spotlightData.data.spotlightAnimes.map(async (anime) => {
         try {
@@ -47,12 +73,14 @@ app.get('/api/spotlight', async (req, res) => {
               const anilistId = detailsData.data.anime.info?.anilistId;
               if (anilistId) {
                 anime.anilistId = anilistId;
-                // Fetch trailer using Consumet API
+                // Fetch trailer from AniList API
                 try {
-                  const anilistInfo = await anilist.fetchAnimeInfo(anilistId);
-                  anime.trailer = anilistInfo?.trailer;
+                  const trailer = await fetchAnilistTrailer(anilistId);
+                  if (trailer) {
+                    anime.trailer = trailer;
+                  }
                 } catch (trailerError) {
-                  console.error(`Error fetching trailer for Anilist ID ${anilistId}:`, trailerError);
+                  console.error(`Error fetching trailer for AniList ID ${anilistId}:`, trailerError);
                 }
               }
             }
