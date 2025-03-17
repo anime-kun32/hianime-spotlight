@@ -5,7 +5,6 @@ const fetch = require('node-fetch');
 const { META } = require('@consumet/extensions');
 
 const app = express();
-const PORT = process.env.PORT || 8000;
 
 // Fetch allowed origins from the .env file
 const ALLOWED_ORIGINS = JSON.parse(process.env.ALLOWED_ORIGINS || '[]');
@@ -23,13 +22,10 @@ const anilist = new META.Anilist();
 
 app.get('/api/spotlight', async (req, res) => {
   try {
-    // Fetch Spotlight Data
-    const spotlightResponse = await fetch(
-      `${API_BASE_URL}/api/v2/hianime/home`,
-      {
-        headers: { Origin: API_ORIGIN_HEADER },
-      }
-    );
+    const spotlightResponse = await fetch(`${API_BASE_URL}/api/v2/hianime/home`, {
+      headers: { Origin: API_ORIGIN_HEADER },
+    });
+
     const spotlightData = await spotlightResponse.json();
 
     if (!spotlightData.success) {
@@ -41,38 +37,27 @@ app.get('/api/spotlight', async (req, res) => {
         try {
           const animeId = anime.id;
           if (animeId) {
-            const detailsResponse = await fetch(
-              `${API_BASE_URL}/api/v2/hianime/anime/${animeId}`,
-              {
-                headers: { Origin: API_ORIGIN_HEADER },
-              }
-            );
+            const detailsResponse = await fetch(`${API_BASE_URL}/api/v2/hianime/anime/${animeId}`, {
+              headers: { Origin: API_ORIGIN_HEADER },
+            });
             const detailsData = await detailsResponse.json();
 
             if (detailsData.success) {
               const anilistId = detailsData.data.anime.info?.anilistId;
               if (anilistId) {
                 anime.anilistId = anilistId;
-
-                // Fetch trailer from Consumet API
                 try {
                   const anilistInfo = await anilist.fetchAnimeInfo(anilistId);
                   anime.trailer = anilistInfo?.trailer;
                 } catch (trailerError) {
-                  console.error(
-                    `Error fetching trailer for Anilist ID ${anilistId}:`,
-                    trailerError
-                  );
+                  console.error(`Error fetching trailer for Anilist ID ${anilistId}:`, trailerError);
                 }
               }
             }
           }
           return anime;
         } catch (err) {
-          console.error(
-            `Error fetching details for anime ID ${anime.id}:`,
-            err
-          );
+          console.error(`Error fetching details for anime ID ${anime.id}:`, err);
           return anime;
         }
       })
@@ -81,9 +66,7 @@ app.get('/api/spotlight', async (req, res) => {
     res.json({ success: true, data: { spotlightAnimes: updatedSpotlight } });
   } catch (error) {
     console.error('Internal Server Error:', error);
-    res
-      .status(500)
-      .json({ error: 'Internal Server Error', details: error.message });
+    res.status(500).json({ error: 'Internal Server Error', details: error.message });
   }
 });
 
@@ -98,7 +81,13 @@ app.use((err, req, res, next) => {
   res.status(500).send('500 Internal Server Error');
 });
 
-// Start the server
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
+// Export the app for Vercel
+module.exports = app;
+
+// Only start the server when running locally
+if (require.main === module) {
+  const PORT = process.env.PORT || 8000;
+  app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+  });
+}
