@@ -1,7 +1,6 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const fetch = require('node-fetch'); // Ensure you have 'node-fetch' installed
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -45,6 +44,10 @@ async function fetchAnilistTrailer(anilistId) {
   }
   return null;
 }
+
+app.get('/', (req, res) => {
+  res.status(200).json({ message: 'Go to /api/spotlight for spotlight data' });
+});
 
 app.get('/api/spotlight', async (req, res) => {
   try {
