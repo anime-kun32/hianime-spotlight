@@ -42,7 +42,7 @@ async function fetchAnilistTrailer(anilistId) {
   if (data.data && data.data.Media && data.data.Media.trailer) {
     return data.data.Media.trailer;
   }
-  return null;
+  return null; // No trailer found
 }
 
 app.get('/', (req, res) => {
@@ -51,7 +51,7 @@ app.get('/', (req, res) => {
 
 app.get('/api/spotlight', async (req, res) => {
   try {
-    // Use native fetch to get spotlight data
+    // Fetch spotlight data from your API
     const spotlightResponse = await fetch(`${API_BASE_URL}/api/v2/hianime/home`, {
       headers: { Origin: API_ORIGIN_HEADER },
     });
@@ -80,7 +80,7 @@ app.get('/api/spotlight', async (req, res) => {
                 try {
                   const trailer = await fetchAnilistTrailer(anilistId);
                   if (trailer) {
-                    anime.trailer = trailer;
+                    anime.trailer = trailer; // Add trailer information to the anime object
                   }
                 } catch (trailerError) {
                   console.error(`Error fetching trailer for AniList ID ${anilistId}:`, trailerError);
@@ -91,11 +91,12 @@ app.get('/api/spotlight', async (req, res) => {
           return anime;
         } catch (err) {
           console.error(`Error fetching details for anime ID ${anime.id}:`, err);
-          return anime;
+          return anime; // Return anime even if there is an error
         }
       })
     );
 
+    // Return the updated spotlight data including trailers
     res.json({ success: true, data: { spotlightAnimes: updatedSpotlight } });
   } catch (error) {
     console.error('Internal Server Error:', error);
