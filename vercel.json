@@ -1,10 +1,15 @@
 {
+  "version": 2,
   "builds": [
-    { "src": "main.py", "use": "@vercel/python" }
+    {
+      "src": "index.js",
+      "use": "@vercel/node"
+    }
   ],
   "routes": [
-    { "src": "/api/.*", "dest": "main.py" },
-    { "handle": "filesystem" },
-    { "src": "/.*", "dest": "/404.html" }
+    {
+      "src": "/api/spotlight",
+      "dest": "index.js"
+    }
   ]
 }
