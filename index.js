@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const fetch = require('node-fetch'); // Import fetch for server-side requests
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -15,35 +16,6 @@ app.use(express.json());
 // API Base URLs from your environment variables
 const API_BASE_URL = process.env.API_BASE_URL;
 const API_ORIGIN_HEADER = process.env.API_ORIGIN_HEADER;
-
-// Function to fetch trailer data from AniList API
-async function fetchAnilistTrailer(anilistId) {
-  const query = `
-    query ($id: Int) {
-      Media(id: $id, type: ANIME) {
-        trailer {
-          id
-          site
-          thumbnail
-          url
-        }
-      }
-    }
-  `;
-  const variables = { id: anilistId };
-  const response = await fetch('https://graphql.anilist.co', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ query, variables }),
-  });
-  const data = await response.json();
-  if (data.data && data.data.Media && data.data.Media.trailer) {
-    return data.data.Media.trailer;
-  }
-  return null; // No trailer found
-}
 
 app.get('/', (req, res) => {
   res.status(200).json({ message: 'Go to /api/spotlight for spotlight data' });
@@ -61,7 +33,7 @@ app.get('/api/spotlight', async (req, res) => {
       return res.status(500).json({ error: 'Failed to fetch spotlight data' });
     }
 
-    // Update each anime with additional details and trailer info from AniList API
+    // Update each anime with trailer info from external API (stackblitz URL)
     const updatedSpotlight = await Promise.all(
       spotlightData.data.spotlightAnimes.map(async (anime) => {
         try {
@@ -76,14 +48,17 @@ app.get('/api/spotlight', async (req, res) => {
               const anilistId = detailsData.data.anime.info?.anilistId;
               if (anilistId) {
                 anime.anilistId = anilistId;
-                // Fetch trailer from AniList API
-                try {
-                  const trailer = await fetchAnilistTrailer(anilistId);
-                  if (trailer) {
-                    anime.trailer = trailer; // Add trailer information to the anime object
-                  }
-                } catch (trailerError) {
-                  console.error(`Error fetching trailer for AniList ID ${anilistId}:`, trailerError);
+                // Fetch trailer from the external API
+                const trailerResponse = await fetch(`https://stackblitz-starters-pdvus4gj.vercel.app/info/${anilistId}`);
+                const trailerData = await trailerResponse.json();
+
+                if (trailerData && trailerData.trailer) {
+                  anime.trailer = {
+                    id: trailerData.trailer.id,
+                    site: trailerData.trailer.site,
+                    thumbnail: trailerData.trailer.thumbnail,
+                    url: `https://www.youtube.com/watch?v=${trailerData.trailer.id}`, // YouTube URL
+                  };
                 }
               }
             }
