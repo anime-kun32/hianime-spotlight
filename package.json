@@ -1,15 +1,15 @@
 {
-  "name": "node-starter",
+  "name": "hianime-spotlight",
   "private": true,
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "@consumet/extensions": "^github:consumet/consumet.ts",
+    "@consumet/extensions": "github:consumet/consumet.ts",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
-    "whatwg-mimetype": "^4.0.0",
+    "node-fetch": "^3.3.2",
+    "whatwg-mimetype": "^4.0.0"
   }
-  
 }
