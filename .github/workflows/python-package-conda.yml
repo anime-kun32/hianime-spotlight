@@ -1,0 +1,24 @@
+name: Create Empty Branch
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch_name:
+        description: "Name of the new empty branch"
+        required: true
+
+jobs:
+  create-branch:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create empty branch
+        run: |
+          git fetch origin
+          git checkout --orphan ${{ github.event.inputs.branch_name }}
+          git rm -rf .
+          git commit --allow-empty -m "Created empty branch ${{ github.event.inputs.branch_name }}"
+          git push origin ${{ github.event.inputs.branch_name }}
