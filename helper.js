@@ -1,23 +1,33 @@
-// helper.js
-const { ANIME } = require('@consumet/extensions'); // Import the Zoro provider
+// Function to fetch the trailer data from AniList API
+const fetchAnilistTrailer = async (anilistId) => {
+  const query = `
+    query {
+      Media(id: ${anilistId}, type: ANIME) {
+        trailer {
+          id
+          site
+          thumbnail
+        }
+      }
+    }`;
 
-// Create an instance of the Zoro provider
-const zoro = new ANIME.Zoro();
+  const response = await fetch('https://graphql.anilist.co', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ query }),
+  });
 
-/**
- * Fetch anime details including the trailer using the Zoro provider.
- * @param {string} animeId - The ID of the anime to fetch.
- * @returns {object|null} - The anime details including the trailer.
- */
-const fetchAnimeDetails = async (animeId) => {
-  try {
-    // Fetch anime details from the Zoro provider
-    const animeDetails = await zoro.fetchAnimeDetails(animeId);
-    return animeDetails;
-  } catch (error) {
-    console.error(`Error fetching details for anime ID ${animeId}:`, error);
-    return null; // Return null if an error occurs
+  const data = await response.json();
+
+  if (data?.data?.Media?.trailer?.site === 'youtube') {
+    return {
+      youtubeUrl: `https://www.youtube.com/watch?v=${data.data.Media.trailer.id}`,
+      thumbnail: data.data.Media.trailer.thumbnail,
+    };
   }
+  return null;
 };
 
-module.exports = { fetchAnimeDetails };
+module.exports = { fetchAnilistTrailer };
