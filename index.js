@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const NodeCache = require('node-cache');
-const { fetchYouTubeTrailer } = require('./helper');
+const { fetchAnimeDetails } = require('./helper'); // Import the helper function
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -10,12 +10,8 @@ const PORT = process.env.PORT || 8000;
 // Fetch allowed origins from .env file
 const ALLOWED_ORIGINS = JSON.parse(process.env.ALLOWED_ORIGINS || '[]');
 
-// Cache setup: Cache spotlight data for 5 minutes (300 seconds) and trailer data for 24 hours (86400 seconds)
-const myCache = new NodeCache({
-  stdTTL: 300, // TTL for spotlight data
-  checkperiod: 600, // Period to check for expired items in cache
-  maxKeys: 100, // Limit the number of keys in the cache to manage memory
-});
+// Cache setup: Cache spotlight data and trailer data for 5 minutes (300 seconds)
+const myCache = new NodeCache({ stdTTL: 300 });
 
 const API_BASE_URL = process.env.API_BASE_URL;
 const API_ORIGIN_HEADER = process.env.API_ORIGIN_HEADER;
@@ -38,7 +34,7 @@ app.get('/api/spotlight', async (req, res) => {
       return res.json(cachedSpotlight); // Return cached data if available
     }
 
-    // Fetch spotlight data from your API
+    // Fetch spotlight data from your API using native fetch
     const spotlightResponse = await fetch(`${API_BASE_URL}/api/v2/hianime/home`, {
       headers: { Origin: API_ORIGIN_HEADER },
     });
@@ -54,20 +50,18 @@ app.get('/api/spotlight', async (req, res) => {
         try {
           const animeId = anime.id;
           if (animeId) {
-            const detailsResponse = await fetch(`${API_BASE_URL}/api/v2/hianime/anime/${animeId}`, {
-              headers: { Origin: API_ORIGIN_HEADER },
-            });
-            const detailsData = await detailsResponse.json();
+            // Fetch additional details including trailers from Zoro
+            const detailsData = await fetchAnimeDetails(animeId);
 
-            if (detailsData.success) {
-              const anilistId = detailsData.data.anime.info?.anilistId;
-              if (anilistId) {
-                anime.anilistId = anilistId;
-                // Fetch trailer from the external API
-                const trailer = await fetchYouTubeTrailer(anilistId);
-                if (trailer) {
-                  anime.trailer = trailer;
-                }
+            if (detailsData) {
+              const { title, trailer } = detailsData;
+              if (trailer) {
+                anime.trailer = {
+                  id: trailer.id,
+                  site: trailer.site,
+                  thumbnail: trailer.thumbnail,
+                  url: `https://www.youtube.com/watch?v=${trailer.id}`,
+                };
               }
             }
           }
@@ -116,9 +110,5 @@ if (process.env.NODE_ENV !== 'production') {
   setInterval(() => {
     const memoryUsage = process.memoryUsage();
     console.log(`Memory Usage: RSS: ${memoryUsage.rss / 1024 / 1024} MB`);
-    if (memoryUsage.rss > 1024 * 1024 * 1024) { // 1 GB limit
-      console.warn("Memory usage exceeded 1GB, consider clearing cache or optimizing.");
-      myCache.flushAll(); // Clear cache if memory limit exceeded
-    }
   }, 5000);
 }
