@@ -1,8 +1,7 @@
 
 # hianime Spotlight API with AniList Trailer Integration
 
-This is a Node.js server that fetches spotlight anime data from an external API and integrates trailers from AniList using their GraphQL API. It uses native `fetch` without external modules for simplicity.
-
+This is a Node.js api that fetches spotlight anime data from an external API and integrates trailers from AniList using their GraphQL API.
 ## 🚀 Features
 - Fetches spotlight anime data from the HiAnime API.
 - Retrieves AniList ID for each anime.
@@ -13,21 +12,21 @@ This is a Node.js server that fetches spotlight anime data from an external API 
 ## 🛠️ Installation
 
 1. Clone the repository:
-```
-git clone <https://github.com/animcd hianime-spotlight-main
+```bash
+git clone <https://github.com/anime-kun32/hianime-spotlight.git
 ```
 extract the zip and then open the folder  
 
 2. Install dependencies:
-```
+```bash
 npm install express dotenv cors node-cache
 ```
 
-3. Create a `.env` file with the following variables:
-```
+3 fill up the env with the following variables:
+```.env
 PORT=8000
-API_BASE_URL=https://your-anime-api.com
-API_ORIGIN_HEADER=https://your-origin-header.com
+API_BASE_URL=https://your-anime-api.com # https://github.com/ghoshRitesh12/aniwatch-api
+API_ORIGIN_HEADER=https://your-origin-header.com # your deployment url or localhost if running locally , this is to prevent cors issues on aniwatch api 
 ALLOWED_ORIGINS=["http://localhost:3000"]
 ```
 
@@ -43,7 +42,7 @@ node index.js
 GET /api/spotlight
 ```
 - Fetches spotlight anime data and appends AniList trailer information.
-- Cached for 5 minutes.
+- Cached for 5 minutes. data is cached in order to make it faster 
 
 ### Example Response
 ```json
@@ -75,3 +74,5 @@ GET /api/spotlight
 
 ## disclaimer
 This project is not affiliated with hianime or any anime studio at all. This project is only made to make thing easier . No files are stored on the server , they are provided by thier respective providers 
+## contribution and issues 
+If you appreciate this project and you want to contribute to it mention in issues or make a pull request if not a star would be appreciated . Any issues at all mention in the issues as well . Thanks for using this project I really appreciate it 
