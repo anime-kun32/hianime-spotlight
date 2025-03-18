@@ -13,7 +13,7 @@ This is a Node.js api that fetches spotlight anime data from an external API and
 
 1. Clone the repository:
 ```bash
-git clone <https://github.com/anime-kun32/hianime-spotlight.git
+git clone https://github.com/anime-kun32/hianime-spotlight.git
 ```
 extract the zip and then open the folder  
 
