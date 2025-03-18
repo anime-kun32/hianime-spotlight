@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const NodeCache = require('node-cache');
-const { fetchAnimeDetails } = require('./helper'); // Import the helper function
+const { fetchAnilistTrailer } = require('./helper'); // Import helper function
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -10,7 +10,7 @@ const PORT = process.env.PORT || 8000;
 // Fetch allowed origins from .env file
 const ALLOWED_ORIGINS = JSON.parse(process.env.ALLOWED_ORIGINS || '[]');
 
-// Cache setup: Cache spotlight data and trailer data for 5 minutes (300 seconds)
+// Cache setup: Cache spotlight data for 5 minutes (300 seconds)
 const myCache = new NodeCache({ stdTTL: 300 });
 
 const API_BASE_URL = process.env.API_BASE_URL;
@@ -34,34 +34,32 @@ app.get('/api/spotlight', async (req, res) => {
       return res.json(cachedSpotlight); // Return cached data if available
     }
 
-    // Fetch spotlight data from your API using native fetch
-    const spotlightResponse = await fetch(`${API_BASE_URL}/api/v2/hianime/home`, {
-      headers: { Origin: API_ORIGIN_HEADER },
-    });
-    const spotlightData = await spotlightResponse.json();
-
-    if (!spotlightData.success) {
+    // Fetch spotlight data from your API
+    const spotlightResponse = await fetchSpotlightData();
+    if (!spotlightResponse.success) {
       return res.status(500).json({ error: 'Failed to fetch spotlight data' });
     }
 
     // Process spotlight data with trailers
     const updatedSpotlight = await Promise.all(
-      spotlightData.data.spotlightAnimes.map(async (anime) => {
+      spotlightResponse.data.spotlightAnimes.map(async (anime) => {
         try {
           const animeId = anime.id;
           if (animeId) {
-            // Fetch additional details including trailers from Zoro
-            const detailsData = await fetchAnimeDetails(animeId);
+            const detailsResponse = await fetchAnimeDetails(animeId);
+            if (detailsResponse.success) {
+              const anilistId = detailsResponse.data.anime.info?.anilistId;
+              if (anilistId) {
+                anime.anilistId = anilistId;
+                // Fetch trailer from AniList API using Anilist ID
+                const trailerData = await fetchAnilistTrailer(anilistId);
 
-            if (detailsData) {
-              const { title, trailer } = detailsData;
-              if (trailer) {
-                anime.trailer = {
-                  id: trailer.id,
-                  site: trailer.site,
-                  thumbnail: trailer.thumbnail,
-                  url: `https://www.youtube.com/watch?v=${trailer.id}`,
-                };
+                if (trailerData) {
+                  anime.trailer = {
+                    url: trailerData.youtubeUrl,
+                    thumbnail: trailerData.thumbnail,
+                  };
+                }
               }
             }
           }
@@ -83,6 +81,32 @@ app.get('/api/spotlight', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error', details: error.message });
   }
 });
+
+// Fetch spotlight data using fetch API
+const fetchSpotlightData = async () => {
+  const response = await fetch(`${API_BASE_URL}/api/v2/hianime/home`, {
+    method: 'GET',
+    headers: {
+      Origin: API_ORIGIN_HEADER,
+    },
+  });
+
+  const data = await response.json();
+  return data;
+};
+
+// Fetch anime details using fetch API
+const fetchAnimeDetails = async (animeId) => {
+  const response = await fetch(`${API_BASE_URL}/api/v2/hianime/anime/${animeId}`, {
+    method: 'GET',
+    headers: {
+      Origin: API_ORIGIN_HEADER,
+    },
+  });
+
+  const data = await response.json();
+  return data;
+};
 
 // Custom 404 Error Handler
 app.use((req, res) => {
